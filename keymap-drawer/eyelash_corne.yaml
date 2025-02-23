@@ -41,7 +41,7 @@ layers:
   - {t: ',', s: <}
   - {t: ., s: '>'}
   - {t: /, s: '?'}
-  - $$mdi:apple-keyboard-option$$
+  - Alt+Ctl+LS
   - LGUI
   - {t: '$$mdi:keyboard-space$$', h: NUMBER}
   - {t: '$$mdi:keyboard-tab$$', h: FN}
@@ -53,8 +53,8 @@ layers:
   - '!'
   - '@'
   - '#'
-  - {t: 'Sft+[', s: 'Sft+{'}
-  - {t: 'Sft+]', s: 'Sft+}'}
+  - {t: '[', s: '{'}
+  - {t: ']', s: '}'}
   - {t: '$$mdi:menu-up$$', s: '$$mdi:mouse$$'}
   - {t: '7', s: '&'}
   - {t: '8', s: '*'}
@@ -81,8 +81,8 @@ layers:
   - '&'
   - {t: '`', s: '~'}
   - '~'
-  - {t: '[', s: '{'}
-  - {t: ']', s: '}'}
+  - {t: 'Sft+[', s: 'Sft+{'}
+  - {t: 'Sft+]', s: 'Sft+}'}
   - $$mdi:volume-off$$
   - {t: '$$mdi:menu-down$$', s: '$$mdi:mouse$$'}
   - {t: '1', s: '!'}
@@ -237,7 +237,7 @@ layers:
   - $$mdi:progress-download$$
   - {t: '$$mdi:backup-restore$$', type: bootloader}
   - SCROLLLOCK
-  - PAUSE BREAK
+  - {t: GAME, h: toggle}
   - {t: '$$mdi:transfer$$', type: trans}
   - {t: '$$mdi:transfer$$', type: trans}
   - {type: held}
@@ -286,7 +286,7 @@ layers:
   - {t: ',', s: <}
   - {t: ., s: '>'}
   - {t: /, s: '?'}
-  - $$mdi:apple-keyboard-control$$
+  - {t: GAME, h: toggle}
   - {t: '$$mdi:transfer$$', type: trans}
   - $$mdi:keyboard-space$$
   - $$mdi:keyboard-tab$$
