@@ -86,8 +86,8 @@
             bindings = <
 &trans  &trans  &trans  &trans  &trans  &trans                              &mmv MOVE_UP                     &kp F7   &kp F8    &kp F9  &kp F11   &kp F12   &kp F13
 &trans  &trans  &trans  &trans  &trans  &trans              &mmv MOVE_LEFT  &mkp LCLK       &mmv MOVE_RIGHT  &kp F4   &kp F5    &kp F6  &trans    &trans    &trans
-&trans  &trans  &trans  &trans  &trans  &trans  &kp trans                   &mmv MOVE_DOWN                   &kp F1   &kp F2    &kp F3  &trans    &trans    &tog GAME
-                        &trans  &trans  &trans                                                                   &trans   &kp F10   &trans
+&trans  &trans  &trans  &trans  &trans  &trans  &trans                      &mmv MOVE_DOWN                   &kp F1   &kp F2    &kp F3  &trans    &trans    &tog GAME
+                        &trans  &trans  &trans                                                               &trans   &kp F10   &trans
             >;
             sensor-bindings = <&scroll_encoder>;
         };
@@ -95,10 +95,10 @@
         layer_5 {
             display-name = "GAME";
             bindings = <
-&kp ESC     &kp Q   &kp W   &kp E       &kp R     &kp T                               &mmv MOVE_UP                      &kp Y     &kp U       &kp I       &kp O     &kp P     &kp BSLH
-&kp LSHIFT  &kp A   &kp S   &kp D       &kp F     &kp G               &mmv MOVE_LEFT  &mkp LCLK       &mmv MOVE_RIGHT   &kp H     &kp J       &kp K       &kp L     &kp SEMI  &kp SQT
-&kp LCTRL   &kp Z   &kp X   &kp C       &kp V     &kp B   &kp C_MUTE                  &mmv MOVE_DOWN                    &kp N     &kp M       &kp COMMA   &kp DOT   &kp FSLH  &tog GAME
-                    &trans  &kp SPACE   &kp TAB                                                                         &kp BSPC  &kp ENTER   &trans
+&kp ESC     &kp Q   &kp W   &kp E       &kp R     &kp T                           &mmv MOVE_UP                      &kp Y     &kp U       &kp I       &kp O     &kp P     &kp BSLH
+&kp LSHIFT  &kp A   &kp S   &kp D       &kp F     &kp G           &mmv MOVE_LEFT  &mkp LCLK       &mmv MOVE_RIGHT   &kp H     &kp J       &kp K       &kp L     &kp SEMI  &kp SQT
+&kp LCTRL   &kp Z   &kp X   &kp C       &kp V     &kp B   &trans                  &mmv MOVE_DOWN                    &kp N     &kp M       &kp COMMA   &kp DOT   &kp FSLH  &tog GAME
+                    &trans  &kp SPACE   &kp TAB                                                                     &kp BSPC  &kp ENTER   &trans
             >;
             sensor-bindings = <&scroll_encoder>;
         };
