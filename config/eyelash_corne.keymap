@@ -41,7 +41,7 @@
             bindings = <
 &kp GRAVE  &kp Q        &kp W       &kp E           &kp R             &kp T                                 &kp UP                &kp Y         &kp U           &kp I         &kp O       &kp P           &kp BSLH
 &kp ESC    &mt LGUI A   &mt LALT S  &mt LCTRL D     &mt LSHIFT F      &kp G                      &kp LEFT   &kp ENTER  &kp RIGHT  &kp H         &mt RSHIFT J    &mt RCTRL K   &mt LALT L  &mt RGUI SEMI   &kp SQT
-&kp LCTRL  &kp Z        &kp X       &kp C           &kp V             &kp B       &kp C_MUTE                &kp DOWN              &kp N         &kp M           &kp COMMA     &kp DOT     &kp FSLH        &kp DEL
+&kp LHYPER &kp Z        &kp X       &kp C           &kp V             &kp B       &kp C_MUTE                &kp DOWN              &kp N         &kp M           &kp COMMA     &kp DOT     &kp FSLH        &kp DEL
                                     &kp LGUI        &lt NUMBER SPACE  &lt FN TAB                                                  &lt SYS BSPC  &lt NAV ENTER   &kp RALT
             >;
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
