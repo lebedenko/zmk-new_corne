@@ -32,10 +32,6 @@
           bindings = <&msc SCRL_DOWN>, <&msc SCRL_UP>;
           tap-ms = <30>;
       };
-
-        &mt {
-            quick-tap-ms = <175>;
-        };
     };
 
     keymap {
