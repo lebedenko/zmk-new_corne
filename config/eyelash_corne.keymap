@@ -23,6 +23,7 @@
           compatible = "zmk,behavior-sensor-rotate";
           #sensor-binding-cells = <0>;
           bindings = <&rgb_ug RGB_BRI>, <&rgb_ug RGB_BRD>;
+            tap-ms = <40>;
       };
 
       scroll_encoder: scroll_encoder {
@@ -31,10 +32,10 @@
           bindings = <&msc SCRL_DOWN>, <&msc SCRL_UP>;
           tap-ms = <30>;
       };
-    };
 
-    &mt {
-        quick-tap-ms = <150>;
+        &mt {
+            quick-tap-ms = <175>;
+        };
     };
 
     keymap {
