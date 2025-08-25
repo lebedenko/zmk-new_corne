@@ -7,8 +7,10 @@
 
 #include <input/processors.dtsi>
 
-#define ZMK_MOUSE_DEFAULT_MOVE_VAL 1200  // 600
-#define ZMK_MOUSE_DEFAULT_SCRL_VAL 20    // 10
+/* #define ZMK_MOUSE_DEFAULT_MOVE_VAL 1200  // 600 */
+/* #define ZMK_MOUSE_DEFAULT_SCRL_VAL 20    // 10 */
+#define ZMK_MOUSE_DEFAULT_MOVE_VAL 600
+#define ZMK_MOUSE_DEFAULT_SCRL_VAL 10
 
 #define DEFAULT 0
 #define NUMBER  1
@@ -23,14 +25,13 @@
           compatible = "zmk,behavior-sensor-rotate";
           #sensor-binding-cells = <0>;
           bindings = <&rgb_ug RGB_BRI>, <&rgb_ug RGB_BRD>;
-            tap-ms = <40>;
       };
 
       scroll_encoder: scroll_encoder {
           compatible = "zmk,behavior-sensor-rotate";
           #sensor-binding-cells = <0>;
           bindings = <&msc SCRL_DOWN>, <&msc SCRL_UP>;
-          tap-ms = <30>;
+          tap-ms = <20>;
       };
     };
 
