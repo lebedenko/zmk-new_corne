@@ -19,6 +19,15 @@
 #define FN      4
 #define GAME    5
 
+&mt {
+  quick-tap-ms = <200>;
+  tapping-term-ms = <200>;
+};
+
+&lt {
+  quick-tap-ms = <200>;
+};
+
 / {
     behaviors {
       rgb_encoder: rgb_encoder {
