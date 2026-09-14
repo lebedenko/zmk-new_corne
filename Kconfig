@@ -1,0 +1,15 @@
+# Copyright (c) 2024 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+menu "Corne Daemon Notifier"
+
+config ZMK_CORNE_DAEMON_NOTIFIER
+    bool "Enable Corne daemon notifier"
+    depends on !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
+    default y if !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
+    select RAW_HID
+    help
+      Sends active layer index and name to host daemon over Raw HID.
+      On split keyboards, this feature is enabled only on the central half.
+
+endmenu
