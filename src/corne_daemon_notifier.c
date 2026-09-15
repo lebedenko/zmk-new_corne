@@ -7,6 +7,7 @@
 #include <zmk/event_manager.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/keymap.h>
+#include <zmk/behavior.h>
 #include <zmk/matrix.h>
 #include <raw_hid/events.h>
 
