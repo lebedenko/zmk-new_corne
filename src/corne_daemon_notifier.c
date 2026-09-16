@@ -201,9 +201,18 @@ static int raw_hid_received_listener(const zmk_event_t *eh) {
         return ZMK_EV_EVENT_BUBBLE;
     }
 
-    pending_cmd = ev->data[0];
-    pending_arg1 = (ev->length > 1) ? ev->data[1] : 0;
-    pending_arg2 = (ev->length > 2) ? ev->data[2] : 0;
+    const uint8_t *data = ev->data;
+    uint8_t len = ev->length;
+
+    /* Handle unstripped dummy report ID (0x00) sent by Linux BLE HoG unnumbered reports */
+    if (len > 1 && data[0] == 0x00) {
+        data++;
+        len--;
+    }
+
+    pending_cmd = data[0];
+    pending_arg1 = (len > 1) ? data[1] : 0;
+    pending_arg2 = (len > 2) ? data[2] : 0;
 
     k_work_submit(&query_work);
 
