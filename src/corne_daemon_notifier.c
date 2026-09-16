@@ -18,6 +18,7 @@
 #include <zmk/keymap.h>
 #include <zmk/behavior.h>
 #include <zmk/matrix.h>
+#include <zmk/sensors.h>
 #include <raw_hid/events.h>
 
 #include "protocol.h"
@@ -32,6 +33,28 @@ BUILD_ASSERT(sizeof(struct zmk_layer_state_report) == ZMK_RAW_REPORT_SIZE, "zmk_
 BUILD_ASSERT(sizeof(struct zmk_keymap_summary_report) == ZMK_RAW_REPORT_SIZE, "zmk_keymap_summary_report size mismatch");
 BUILD_ASSERT(sizeof(struct zmk_layer_info_report) == ZMK_RAW_REPORT_SIZE, "zmk_layer_info_report size mismatch");
 BUILD_ASSERT(sizeof(struct zmk_layer_binding_report) == ZMK_RAW_REPORT_SIZE, "zmk_layer_binding_report size mismatch");
+BUILD_ASSERT(sizeof(struct zmk_sensor_binding_report) == ZMK_RAW_REPORT_SIZE, "zmk_sensor_binding_report size mismatch");
+
+#if ZMK_KEYMAP_HAS_SENSORS
+#define _CORNE_TRANSFORM_SENSOR_ENTRY(idx, layer)                                                  \
+    {                                                                                              \
+        .behavior_dev = DEVICE_DT_NAME(DT_PHANDLE_BY_IDX(layer, sensor_bindings, idx)),            \
+        .param1 = COND_CODE_0(DT_PHA_HAS_CELL_AT_IDX(layer, sensor_bindings, idx, param1), (0),    \
+                              (DT_PHA_BY_IDX(layer, sensor_bindings, idx, param1))),               \
+        .param2 = COND_CODE_0(DT_PHA_HAS_CELL_AT_IDX(layer, sensor_bindings, idx, param2), (0),    \
+                              (DT_PHA_BY_IDX(layer, sensor_bindings, idx, param2))),               \
+    }
+
+#define CORNE_SENSOR_LAYER(node)                                                                   \
+    COND_CODE_1(                                                                                   \
+        DT_NODE_HAS_PROP(node, sensor_bindings),                                                   \
+        ({LISTIFY(DT_PROP_LEN(node, sensor_bindings), _CORNE_TRANSFORM_SENSOR_ENTRY, (, ), node)}), \
+        ({}))
+
+static const struct zmk_behavior_binding
+    corne_sensor_keymap[ZMK_KEYMAP_LAYERS_LEN][ZMK_KEYMAP_SENSORS_LEN] = {
+        DT_INST_FOREACH_CHILD_SEP(0, CORNE_SENSOR_LAYER, (, ))};
+#endif
 
 static uint8_t hid_tx_buf[ZMK_RAW_REPORT_SIZE];
 
@@ -71,10 +94,17 @@ static void corne_send_keymap_summary(void) {
     report->layer_count = (uint8_t)ZMK_KEYMAP_LAYERS_LEN;
     report->keys_per_layer = (uint8_t)ZMK_KEYMAP_LEN;
     report->default_layer = (uint8_t)zmk_keymap_layer_default();
+    report->sensors_per_layer =
+#if ZMK_KEYMAP_HAS_SENSORS
+        (uint8_t)ZMK_KEYMAP_SENSORS_LEN;
+#else
+        0;
+#endif
     strncpy(report->build_id, CORNE_BUILD_ID, ZMK_BUILD_ID_LEN);
 
-    LOG_INF("Corne notifier sending keymap summary: layers=%u, keys=%u, default=%u, build=%.8s",
-            report->layer_count, report->keys_per_layer, report->default_layer, report->build_id);
+    LOG_INF("Corne notifier sending keymap summary: layers=%u, keys=%u, sensors=%u, default=%u, build=%.8s",
+            report->layer_count, report->keys_per_layer, report->sensors_per_layer,
+            report->default_layer, report->build_id);
 
     raise_raw_hid_sent_event((struct raw_hid_sent_event){
         .data = hid_tx_buf,
@@ -149,6 +179,44 @@ static void corne_send_layer_binding(uint8_t layer_idx, uint8_t binding_idx) {
     });
 }
 
+static void corne_send_sensor_binding(uint8_t layer_idx, uint8_t sensor_idx) {
+#if ZMK_KEYMAP_HAS_SENSORS
+    if (layer_idx >= ZMK_KEYMAP_LAYERS_LEN || sensor_idx >= ZMK_KEYMAP_SENSORS_LEN) {
+        LOG_WRN("Corne notifier: requested invalid sensor idx=%u on layer=%u",
+                sensor_idx, layer_idx);
+        return;
+    }
+
+    const struct zmk_behavior_binding *binding = &corne_sensor_keymap[layer_idx][sensor_idx];
+
+    memset(hid_tx_buf, 0, sizeof(hid_tx_buf));
+    struct zmk_sensor_binding_report *report = (struct zmk_sensor_binding_report *)hid_tx_buf;
+    report->msg_type = CORNE_MSG_SENSOR_BINDING;
+    report->layer_index = layer_idx;
+    report->sensor_index = sensor_idx;
+
+    if (binding != NULL) {
+        if (binding->behavior_dev != NULL) {
+            strncpy(report->behavior_name, binding->behavior_dev, ZMK_MAX_BEHAVIOR_NAME_LEN - 1);
+        }
+        report->param1 = binding->param1;
+        report->param2 = binding->param2;
+    }
+
+    LOG_DBG("Corne notifier sending sensor binding: layer=%u, sensor=%u, behavior=%s, p1=0x%x, p2=0x%x",
+            layer_idx, sensor_idx, report->behavior_name, report->param1, report->param2);
+
+    raise_raw_hid_sent_event((struct raw_hid_sent_event){
+        .data = hid_tx_buf,
+        .length = sizeof(hid_tx_buf),
+    });
+#else
+    ARG_UNUSED(layer_idx);
+    ARG_UNUSED(sensor_idx);
+    LOG_WRN("Corne notifier: sensors not enabled in build");
+#endif
+}
+
 static int layer_state_changed_listener(const zmk_event_t *eh) {
     ARG_UNUSED(eh);
     corne_send_layer_state();
@@ -185,6 +253,12 @@ static void query_work_handler(struct k_work *work) {
         LOG_DBG("Corne notifier: processing query for layer binding: layer=%u, pos=%u",
                 pending_arg1, pending_arg2);
         corne_send_layer_binding(pending_arg1, pending_arg2);
+        break;
+
+    case CORNE_CMD_GET_SENSOR_BINDING:
+        LOG_DBG("Corne notifier: processing query for sensor binding: layer=%u, sensor=%u",
+                pending_arg1, pending_arg2);
+        corne_send_sensor_binding(pending_arg1, pending_arg2);
         break;
 
     default:

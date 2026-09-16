@@ -20,12 +20,14 @@
 #define CORNE_MSG_KEYMAP_SUMMARY     0x02
 #define CORNE_MSG_LAYER_INFO         0x03
 #define CORNE_MSG_LAYER_BINDING      0x04
+#define CORNE_MSG_SENSOR_BINDING     0x05
 
 /* Command types from Host -> Keyboard */
 #define CORNE_CMD_GET_CURRENT_LAYER  0x01
 #define CORNE_CMD_GET_KEYMAP_SUMMARY 0x02
 #define CORNE_CMD_GET_LAYER_INFO      0x03
 #define CORNE_CMD_GET_LAYER_BINDING   0x04
+#define CORNE_CMD_GET_SENSOR_BINDING  0x05
 
 #pragma pack(push, 1)
 
@@ -67,7 +69,8 @@ struct zmk_keymap_summary_report {
     uint8_t  keys_per_layer;               /* Number of keys per layer (e.g. 48) */
     uint8_t  default_layer;                /* Default layer ID (usually 0) */
     char     build_id[ZMK_BUILD_ID_LEN];   /* Firmware build ID */
-    uint8_t  reserved[20];
+    uint8_t  sensors_per_layer;            /* Number of sensors per layer (e.g. 1) */
+    uint8_t  reserved[19];
 };
 
 /**
@@ -112,6 +115,29 @@ struct zmk_layer_binding_report {
     char     behavior_name[ZMK_MAX_BEHAVIOR_NAME_LEN]; /* Null-terminated behavior name (e.g. "kp", "hml") */
     uint32_t param1;                       /* Binding parameter 1 (keycode / layer) */
     uint32_t param2;                       /* Binding parameter 2 (second keycode / modifier) */
+    uint8_t  reserved[9];
+};
+
+/**
+ * @brief Command sent by host to query a specific sensor binding on a layer
+ */
+struct zmk_get_sensor_binding_cmd {
+    uint8_t  cmd_type;                     /* CORNE_CMD_GET_SENSOR_BINDING (0x05) */
+    uint8_t  layer_index;                  /* Layer index */
+    uint8_t  sensor_index;                 /* Sensor index (0..sensors_per_layer-1) */
+    uint8_t  reserved[29];
+};
+
+/**
+ * @brief Report sent by keyboard with behavior binding details for a single sensor
+ */
+struct zmk_sensor_binding_report {
+    uint8_t  msg_type;                     /* CORNE_MSG_SENSOR_BINDING (0x05) */
+    uint8_t  layer_index;                  /* Layer index */
+    uint8_t  sensor_index;                 /* Sensor index */
+    char     behavior_name[ZMK_MAX_BEHAVIOR_NAME_LEN]; /* Null-terminated behavior name */
+    uint32_t param1;                       /* CW param / keycode */
+    uint32_t param2;                       /* CCW param / keycode */
     uint8_t  reserved[9];
 };
 
