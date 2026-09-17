@@ -15,12 +15,16 @@
 #define ZMK_BUILD_ID_LEN 8
 #define ZMK_MAX_BEHAVIOR_NAME_LEN 12
 
+/* Protocol Version */
+#define CORNE_PROTOCOL_VERSION       0x01
+
 /* Message types from Keyboard -> Host */
 #define CORNE_MSG_LAYER_STATE        0x01
 #define CORNE_MSG_KEYMAP_SUMMARY     0x02
 #define CORNE_MSG_LAYER_INFO         0x03
 #define CORNE_MSG_LAYER_BINDING      0x04
 #define CORNE_MSG_SENSOR_BINDING     0x05
+#define CORNE_MSG_CMD_ACK            0x06
 
 /* Command types from Host -> Keyboard */
 #define CORNE_CMD_GET_CURRENT_LAYER  0x01
@@ -28,6 +32,8 @@
 #define CORNE_CMD_GET_LAYER_INFO      0x03
 #define CORNE_CMD_GET_LAYER_BINDING   0x04
 #define CORNE_CMD_GET_SENSOR_BINDING  0x05
+#define CORNE_CMD_SET_LAYER          0x06
+#define CORNE_CMD_CLEAR_LAYER        0x07
 
 #pragma pack(push, 1)
 
@@ -41,7 +47,7 @@ struct zmk_layer_state_report {
     uint8_t  name_len;                     /* Length of ASCII layer name */
     char     name[ZMK_MAX_LAYER_NAME_LEN]; /* Null-terminated ASCII name */
     char     build_id[ZMK_BUILD_ID_LEN];   /* Firmware build ID (git short SHA or keymap hash) */
-    uint8_t  reserved[1];                  /* Padding for 32-byte report size */
+    uint8_t  seq;                          /* Sequence / request ID (0 for push notifications) */
 };
 
 /**
@@ -49,7 +55,8 @@ struct zmk_layer_state_report {
  */
 struct zmk_get_layer_cmd {
     uint8_t  cmd_type;                     /* CORNE_CMD_GET_CURRENT_LAYER (0x01) */
-    uint8_t  reserved[31];
+    uint8_t  seq;                          /* Sequence / request ID */
+    uint8_t  reserved[30];
 };
 
 /**
@@ -57,7 +64,8 @@ struct zmk_get_layer_cmd {
  */
 struct zmk_get_keymap_summary_cmd {
     uint8_t  cmd_type;                     /* CORNE_CMD_GET_KEYMAP_SUMMARY (0x02) */
-    uint8_t  reserved[31];
+    uint8_t  seq;                          /* Sequence / request ID */
+    uint8_t  reserved[30];
 };
 
 /**
@@ -70,7 +78,8 @@ struct zmk_keymap_summary_report {
     uint8_t  default_layer;                /* Default layer ID (usually 0) */
     char     build_id[ZMK_BUILD_ID_LEN];   /* Firmware build ID */
     uint8_t  sensors_per_layer;            /* Number of sensors per layer (e.g. 1) */
-    uint8_t  reserved[19];
+    uint8_t  seq;                          /* Sequence / request ID */
+    uint8_t  reserved[18];
 };
 
 /**
@@ -79,7 +88,8 @@ struct zmk_keymap_summary_report {
 struct zmk_get_layer_info_cmd {
     uint8_t  cmd_type;                     /* CORNE_CMD_GET_LAYER_INFO (0x03) */
     uint8_t  layer_index;                  /* Layer index (0..layer_count-1) */
-    uint8_t  reserved[30];
+    uint8_t  seq;                          /* Sequence / request ID */
+    uint8_t  reserved[29];
 };
 
 /**
@@ -92,7 +102,8 @@ struct zmk_layer_info_report {
     uint8_t  name_len;                     /* Length of ASCII name */
     char     name[ZMK_MAX_LAYER_NAME_LEN]; /* Null-terminated ASCII name */
     uint8_t  is_active;                    /* 1 if layer currently active, 0 otherwise */
-    uint8_t  reserved[11];
+    uint8_t  seq;                          /* Sequence / request ID */
+    uint8_t  reserved[10];
 };
 
 /**
@@ -102,7 +113,8 @@ struct zmk_get_layer_binding_cmd {
     uint8_t  cmd_type;                     /* CORNE_CMD_GET_LAYER_BINDING (0x04) */
     uint8_t  layer_index;                  /* Layer index */
     uint8_t  binding_index;                /* Key position (0..keys_per_layer-1) */
-    uint8_t  reserved[29];
+    uint8_t  seq;                          /* Sequence / request ID */
+    uint8_t  reserved[28];
 };
 
 /**
@@ -115,7 +127,8 @@ struct zmk_layer_binding_report {
     char     behavior_name[ZMK_MAX_BEHAVIOR_NAME_LEN]; /* Null-terminated behavior name (e.g. "kp", "hml") */
     uint32_t param1;                       /* Binding parameter 1 (keycode / layer) */
     uint32_t param2;                       /* Binding parameter 2 (second keycode / modifier) */
-    uint8_t  reserved[9];
+    uint8_t  seq;                          /* Sequence / request ID */
+    uint8_t  reserved[8];
 };
 
 /**
@@ -125,7 +138,8 @@ struct zmk_get_sensor_binding_cmd {
     uint8_t  cmd_type;                     /* CORNE_CMD_GET_SENSOR_BINDING (0x05) */
     uint8_t  layer_index;                  /* Layer index */
     uint8_t  sensor_index;                 /* Sensor index (0..sensors_per_layer-1) */
-    uint8_t  reserved[29];
+    uint8_t  seq;                          /* Sequence / request ID */
+    uint8_t  reserved[28];
 };
 
 /**
@@ -138,7 +152,40 @@ struct zmk_sensor_binding_report {
     char     behavior_name[ZMK_MAX_BEHAVIOR_NAME_LEN]; /* Null-terminated behavior name */
     uint32_t param1;                       /* CW param / keycode */
     uint32_t param2;                       /* CCW param / keycode */
-    uint8_t  reserved[9];
+    uint8_t  seq;                          /* Sequence / request ID */
+    uint8_t  reserved[8];
+};
+
+/**
+ * @brief Command sent by host to activate/lock a context layer with lease duration
+ */
+struct zmk_set_layer_cmd {
+    uint8_t  cmd_type;                     /* CORNE_CMD_SET_LAYER (0x06) */
+    uint8_t  layer_index;                  /* Layer index to activate */
+    uint8_t  lock;                         /* 1 to lock/activate, 0 to deactivate */
+    uint8_t  seq;                          /* Sequence / request ID */
+    uint16_t lease_ms;                     /* Lease duration in ms (default 5000, 0xFFFF = indefinite) */
+    uint8_t  reserved[26];
+};
+
+/**
+ * @brief Command sent by host to clear any active context layer
+ */
+struct zmk_clear_layer_cmd {
+    uint8_t  cmd_type;                     /* CORNE_CMD_CLEAR_LAYER (0x07) */
+    uint8_t  seq;                          /* Sequence / request ID */
+    uint8_t  reserved[30];
+};
+
+/**
+ * @brief Command ACK sent by keyboard
+ */
+struct zmk_cmd_ack_report {
+    uint8_t  msg_type;                     /* CORNE_MSG_CMD_ACK (0x06) */
+    uint8_t  cmd_type;                     /* Command that was ACKed */
+    uint8_t  status;                       /* 0 = success, non-zero = error */
+    uint8_t  seq;                          /* Sequence / request ID from command */
+    uint8_t  reserved[28];
 };
 
 #pragma pack(pop)
