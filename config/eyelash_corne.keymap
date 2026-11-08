@@ -113,7 +113,7 @@
         layer_3 {
             display-name = "SYS";
             bindings = <
-&bt BT_CLR_ALL  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                          &mmv MOVE_UP                     &rgb_ug RGB_ON   &rgb_ug RGB_OFF   &rgb_ug RGB_EFF   &rgb_ug RGB_EFR   &rgb_ug RGB_SPI   &rgb_ug RGB_BRI
+&bt BT_CLR  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                          &mmv MOVE_UP                     &rgb_ug RGB_ON   &rgb_ug RGB_OFF   &rgb_ug RGB_EFF   &rgb_ug RGB_EFR   &rgb_ug RGB_SPI   &rgb_ug RGB_BRI
 &out OUT_USB    &out OUT_BLE  &trans        &trans        &trans        &trans                &mmv MOVE_LEFT  &mkp LCLK       &mmv MOVE_RIGHT  &trans           &trans            &trans            &trans            &trans            &trans
 &bootloader     &sys_reset    &trans        &trans        &trans        &trans        &trans                  &mmv MOVE_DOWN                   &trans           &trans            &trans            &trans            &sys_reset        &bootloader
                               &trans        &trans        &trans                                                                               &trans           &trans            &trans
